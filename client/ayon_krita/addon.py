@@ -14,8 +14,8 @@ class KritaAddon(AYONAddon, IHostAddon):
     version = __version__
     host_name = "krita"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, manager, settings):
+        super().__init__(manager, settings)
         debug_log(f"KritaAddon.__init__ called")
 
     def add_implementation_envs(self, env, _app):
@@ -23,7 +23,7 @@ class KritaAddon(AYONAddon, IHostAddon):
         debug_log(f"App host_name: {getattr(_app, 'host_name', 'N/A')}")
         debug_log(f"App name: {getattr(_app, 'name', 'N/A')}")
         
-        # Add requirements to KRITA_PATH
+        # Add requirements to KRITA_PATH (for resources)
         startup_path = os.path.join(KRITA_HOST_DIR, "startup")
         debug_log(f"Startup path: {startup_path}")
         
@@ -44,6 +44,22 @@ class KritaAddon(AYONAddon, IHostAddon):
         new_krita_path.append("&")
         env["KRITA_PATH"] = os.pathsep.join(new_krita_path)
         debug_log(f"New KRITA_PATH: {env['KRITA_PATH']}")
+        
+        # Add parent directory to PYTHONPATH so Python can import ayon_krita modules
+        parent_dir = os.path.dirname(KRITA_HOST_DIR)
+        old_pythonpath = env.get("PYTHONPATH") or ""
+        debug_log(f"Old PYTHONPATH: {old_pythonpath}")
+        
+        new_pythonpath = [parent_dir]
+        for path in old_pythonpath.split(os.pathsep):
+            if not path:
+                continue
+            norm_path = os.path.normpath(path)
+            if norm_path not in new_pythonpath:
+                new_pythonpath.append(norm_path)
+        
+        env["PYTHONPATH"] = os.pathsep.join(new_pythonpath)
+        debug_log(f"New PYTHONPATH: {env['PYTHONPATH']}")
 
     def get_launch_hook_paths(self, app):
         debug_log(f"get_launch_hook_paths called")

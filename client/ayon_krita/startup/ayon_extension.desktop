@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=Krita/PythonPlugin
+X-KDE-Library=ayon_extension
+X-Python-2-Compatible=false
+Name=AYON Integration
+Comment=AYON host integration for Krita
+Icon=
+
