@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 """Package declaring AYON addon 'krita' version."""
-__version__ = "0.0.4+dev"
+__version__ = "0.0.7+dev"
