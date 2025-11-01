@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Package declaring addon version."""
 name = "krita"
-version = "0.0.1+dev"
+version = "0.0.3+dev"
 title = "Krita Host Integration"
 client_dir = "ayon_krita"
 project_can_override_addon_version = True

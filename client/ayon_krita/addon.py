@@ -1,60 +1,39 @@
-from __future__ import annotations
+import os
+from ayon_core.addon import AYONAddon, IHostAddon
 
-import typing
-from typing import Optional, Any
-
-from ayon_core.addon import AYONAddon, ITrayAddon
-
-from .constants import ADDON_NAME
 from .version import __version__
-from .utils import (
-    is_ffmpeg_download_needed,
-    is_oiio_download_needed,
-)
 
-if typing.TYPE_CHECKING:
-    from .download_ui import DownloadWindow
+KRITA_HOST_DIR = os.path.dirname(os.path.abspath(__file__))
 
-
-class ThirdPartyDistAddon(AYONAddon, ITrayAddon):
-    """Addon to deploy 3rd party binary dependencies.
-
-    Addon can also skip distribution of binaries from server and can
-    use path/arguments defined by server.
-
-    Cares about supplying ffmpeg and oiiotool executables.
-    """
-
-    name = ADDON_NAME
+class KritaAddon(AYONAddon, IHostAddon):
+    name = "krita"
     version = __version__
+    host_name = "krita"
 
-    def initialize(self, settings: dict[str, Any]) -> None:
-        self._download_window: Optional["DownloadWindow"] = None
+    def add_implementation_envs(self, env, _app):
+        # Add requirements to KRITA_PATH
+        startup_path = os.path.join(KRITA_HOST_DIR, "startup")
+        new_krita_path = [startup_path]
 
-    def tray_exit(self) -> None:
-        pass
+        old_krita_path = env.get("KRITA_PATH") or ""
+        for path in old_krita_path.split(os.pathsep):
+            if not path:
+                continue
 
-    def tray_menu(self, tray_menu) -> None:
-        pass
+            norm_path = os.path.normpath(path)
+            if norm_path not in new_krita_path:
+                new_krita_path.append(norm_path)
 
-    def tray_init(self) -> None:
-        pass
+        # Add & (ampersand), it represents "the standard krita Path contents"
+        new_krita_path.append("&")
+        env["KRITA_PATH"] = os.pathsep.join(new_krita_path)
 
-    def tray_start(self) -> None:
-        download_ffmpeg = is_ffmpeg_download_needed()
-        download_oiio = is_oiio_download_needed()
-        if not download_oiio and not download_ffmpeg:
-            return
+    def get_launch_hook_paths(self, app):
+        if app.host_name != self.host_name:
+            return []
+        return [
+            os.path.join(KRITA_HOST_DIR, "hooks")
+        ]
 
-        from .download_ui import show_download_window
-
-        download_window = show_download_window(
-            download_ffmpeg, download_oiio
-        )
-        download_window.finished.connect(self._on_download_finish)
-        download_window.start()
-        self._download_window = download_window
-
-    def _on_download_finish(self) -> None:
-        self._download_window.close()
-        self._download_window = None
+    def get_workfile_extensions(self):
+        return [".kra"]

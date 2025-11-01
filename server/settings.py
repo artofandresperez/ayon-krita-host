@@ -95,8 +95,8 @@ class OIIOSettings(BaseSettingsModel):
     )
 
 
-class ThirdPartySettings(BaseSettingsModel):
-    """Third party addon settings."""
+class KritaSettings(BaseSettingsModel):
+    """Krita host integration settings."""
 
     ffmpeg: FFmpegSettings = Field(
         default_factory=FFmpegSettings,

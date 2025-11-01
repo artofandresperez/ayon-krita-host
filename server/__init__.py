@@ -7,13 +7,16 @@ from ayon_server.addons import BaseServerAddon
 from ayon_server.api.dependencies import dep_current_user
 from ayon_server.entities import UserEntity
 
-from .settings import ThirdPartySettings
+from .settings import KritaSettings
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class ThirdPartyDistAddon(BaseServerAddon):
-    settings_model = ThirdPartySettings
+class KritaAddon(BaseServerAddon):
+    """Krita host integration addon."""
+
+    name = "krita"
+    settings_model = KritaSettings
 
     def initialize(self):
         self.add_endpoint(
